@@ -1,0 +1,3 @@
+numpy>=1.24
+opencv-contrib-python-headless>=4.8   # contrib wegen CSRT-Tracker; headless vermeidet Qt-Konflikte mit PySide6
+PySide6>=6.6
