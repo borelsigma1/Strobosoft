@@ -1,0 +1,2 @@
+# Strobosoft
+Video Stroboskop Software
