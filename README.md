@@ -38,6 +38,24 @@ pip install -r requirements.txt
 python -m strobosoft            # optional: python -m strobosoft mein_video.mp4
 ```
 
+Alternativ: `python run.py` im Projektordner.
+
+### Windows mit VS Code
+
+1. Projektordner in VS Code öffnen (**Datei → Ordner öffnen**).
+2. Einmalig im Terminal (PowerShell):
+   ```powershell
+   python -m venv .venv
+   .venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   ```
+   Falls PowerShell das Aktivieren verweigert, vorher
+   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` ausführen.
+3. Unten rechts bzw. mit `Strg+Umschalt+P` → „Python: Interpreter auswählen“
+   den Interpreter aus `.venv` wählen.
+4. Starten mit **F5** (Startkonfiguration „Strobosoft starten“) oder
+   `run.py` öffnen und auf ▶ klicken.
+
 Zum Ausprobieren ohne eigenes Video: **Datei → Beispielvideo erzeugen**. Das
 erzeugt einen schiefen Wurf; der schwarze Balken unten links ist genau 1 m lang.
 
@@ -58,13 +76,17 @@ erzeugt einen schiefen Wurf; der schwarze Balken unten links ist genau 1 m lang.
 - Ruhiger, kontrastreicher Hintergrund; das Objekt sollte sich deutlich abheben.
 - Maßstab (Meterstab o. Ä.) in der Bewegungsebene ins Bild legen.
 - Kurze Belichtungszeit (viel Licht bzw. Zeitlupe) gegen Bewegungsunschärfe.
+- Lässt sich ein Video nicht öffnen, zeigt Strobosoft Ursache und Abhilfe an.
+  Videos werden mit PyAV (FFmpeg) gelesen, das auch HEVC-Videos vom iPhone,
+  .mov-Dateien und Pfade mit Umlauten kann; OpenCV dient als Ausweichlösung.
+  Fehlt PyAV, hilft `pip install av`.
 - Smartphones nehmen manchmal mit variabler Bildrate auf; Strobosoft rechnet
   mit der mittleren Bildrate des Videos.
 
 ## Entwicklung
 
 ```bash
-pip install -r requirements.txt pytest
+pip install -r requirements.txt pytest imageio-ffmpeg
 python -m pytest
 ```
 

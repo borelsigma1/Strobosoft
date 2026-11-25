@@ -327,7 +327,10 @@ class MainWindow(QMainWindow):
         try:
             src = VideoSource(path)
         except VideoError as e:
-            QMessageBox.critical(self, "Fehler", str(e))
+            QMessageBox.critical(self, "Video öffnen", str(e))
+            return
+        except Exception as e:  # unerwartet, aber nicht abstürzen
+            QMessageBox.critical(self, "Video öffnen", f"Video konnte nicht geöffnet werden:\n{path}\n\n{e}")
             return
         if self.source:
             self.source.close()
@@ -347,7 +350,7 @@ class MainWindow(QMainWindow):
         self.end_spin.setValue(last)
         self.info_label.setText(
             f"{Path(path).name}\n{info.width} × {info.height} px, {fmt(info.fps)} Bilder/s, "
-            f"{info.frame_count} Bilder ({fmt(info.duration)} s)")
+            f"{info.frame_count} Bilder ({fmt(info.duration)} s)\nDecoder: {src.backend}")
         self.view_combo.setCurrentIndex(VIEW_FRAME)
         self.frame_slider.setValue(0)
         self._on_frame_changed(0)

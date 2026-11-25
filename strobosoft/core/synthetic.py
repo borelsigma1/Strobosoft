@@ -81,22 +81,53 @@ def render_frame(scene: ThrowScene, background: np.ndarray, t: float, rng: np.ra
     return frame
 
 
-def write_demo_video(path: str | Path, scene: ThrowScene = ThrowScene()) -> Path:
-    """Schreibt das Beispielvideo. Gibt den tatsächlichen Pfad zurück
-    (bei fehlendem MP4-Codec wird auf .avi/MJPG ausgewichen)."""
+def write_demo_video(path: str | Path, scene: ThrowScene = ThrowScene(), backend: str | None = None) -> Path:
+    """Schreibt das Beispielvideo und gibt den tatsächlichen Pfad zurück.
+
+    Bevorzugt PyAV (H.264/MPEG-4 als .mp4); ohne PyAV OpenCV, notfalls
+    als .avi mit MJPG.
+    """
     path = Path(path)
     bg = scene_background(scene)
     rng = np.random.default_rng(7)
+    frames = (render_frame(scene, bg, i / scene.fps, rng) for i in range(scene.frame_count))
+    if backend in (None, "pyav"):
+        try:
+            import av
+        except ImportError:
+            av = None
+        if av is not None:
+            out_path = path.with_suffix(".mp4")
+            for codec in ("libx264", "h264", "mpeg4"):
+                try:
+                    with av.open(str(out_path), "w") as container:
+                        stream = container.add_stream(codec, rate=int(round(scene.fps)))
+                        stream.width, stream.height = scene.width, scene.height
+                        stream.pix_fmt = "yuv420p"
+                        if codec == "libx264":
+                            stream.options = {"crf": "18"}
+                        for img in frames:
+                            frame = av.VideoFrame.from_ndarray(img, format="bgr24")
+                            for packet in stream.encode(frame):
+                                container.mux(packet)
+                        for packet in stream.encode():
+                            container.mux(packet)
+                    return out_path
+                except Exception:
+                    rng = np.random.default_rng(7)
+                    frames = (render_frame(scene, bg, i / scene.fps, rng) for i in range(scene.frame_count))
+                    continue
     for suffix, fourcc in ((path.suffix or ".mp4", "mp4v"), (".avi", "MJPG")):
         out_path = path.with_suffix(suffix)
         writer = cv2.VideoWriter(str(out_path), cv2.VideoWriter_fourcc(*fourcc), scene.fps, (scene.width, scene.height))
         if writer.isOpened():
             break
+        writer.release()
     else:
         raise RuntimeError("Kein Video-Codec zum Schreiben verfügbar")
     try:
-        for i in range(scene.frame_count):
-            writer.write(render_frame(scene, bg, i / scene.fps, rng))
+        for img in frames:
+            writer.write(img)
     finally:
         writer.release()
     return out_path
