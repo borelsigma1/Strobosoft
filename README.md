@@ -76,13 +76,17 @@ erzeugt einen schiefen Wurf; der schwarze Balken unten links ist genau 1 m lang.
 - Ruhiger, kontrastreicher Hintergrund; das Objekt sollte sich deutlich abheben.
 - Maßstab (Meterstab o. Ä.) in der Bewegungsebene ins Bild legen.
 - Kurze Belichtungszeit (viel Licht bzw. Zeitlupe) gegen Bewegungsunschärfe.
+- Lässt sich ein Video nicht öffnen, zeigt Strobosoft Ursache und Abhilfe an.
+  Videos werden mit PyAV (FFmpeg) gelesen, das auch HEVC-Videos vom iPhone,
+  .mov-Dateien und Pfade mit Umlauten kann; OpenCV dient als Ausweichlösung.
+  Fehlt PyAV, hilft `pip install av`.
 - Smartphones nehmen manchmal mit variabler Bildrate auf; Strobosoft rechnet
   mit der mittleren Bildrate des Videos.
 
 ## Entwicklung
 
 ```bash
-pip install -r requirements.txt pytest
+pip install -r requirements.txt pytest imageio-ffmpeg
 python -m pytest
 ```
 
